@@ -2,6 +2,8 @@
 
 **Got MUSD but no BTC for gas? Sign one free permit and get enough native BTC to use Mezo.**
 
+**Live demo:** https://refuel-self.vercel.app (Mezo testnet)
+
 > **Status: testnet only.** Refuel runs on Mezo testnet (chainId 31611) with test funds. It is not deployed on mainnet. Mainnet is the first roadmap milestone below.
 
 ## The problem
@@ -73,6 +75,7 @@ sequenceDiagram
 | TroveManager | [`0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0`](https://explorer.test.mezo.org/address/0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0) |
 | Relayer | [`0xA2945e0841D93fDE3738397F26c0E5de6C40eC10`](https://explorer.test.mezo.org/address/0xA2945e0841D93fDE3738397F26c0E5de6C40eC10) |
 | Owner / deployer | [`0x4EA77A60204b20f9aB7b1E35Bb8922606C8A0362`](https://explorer.test.mezo.org/address/0x4EA77A60204b20f9aB7b1E35Bb8922606C8A0362) |
+| Live app / relayer API | https://refuel-self.vercel.app ([health](https://refuel-self.vercel.app/api/health)) |
 | Deploy block | [16793627](https://explorer.test.mezo.org/block/16793627) |
 
 `contracts/deployments/31611.json` has the machine-readable copy.
@@ -151,6 +154,13 @@ The script creates new keys and saves them to `scripts/.demo-wallets.json`, whic
 ## On-chain proof
 
 <!-- demo-proof -->
+
+_Run 2026-11-15T09:56:08.583Z via `pnpm demo --count 1 --amount 2 --api https://refuel-self.vercel.app` (through the hosted relayer on Vercel)_
+
+| Wallet | Refuel tx | BTC received | Follow-up tx (own gas) |
+|---|---|---|---|
+| [`0xeEb0dA…0842`](https://explorer.test.mezo.org/address/0xeEb0dAD08Ea8010A166b07Bc1F79f3142bee0842) | [0x0b9b6d74…](https://explorer.test.mezo.org/tx/0x0b9b6d749b94b03ae13d1c53299769bd35fe5adb8ab117d284542662ab1ca8f9) | 0.000029236867880329 | [0x7e55d9fa…](https://explorer.test.mezo.org/tx/0x7e55d9fa91583e64ef41cccfce65ade9555890efbbf4714dba08c1045545e68f) |
+
 
 _Run 2026-11-15T09:44:36.148Z via `pnpm demo --count 4 --amount 2`_
 
