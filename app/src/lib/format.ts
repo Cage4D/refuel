@@ -25,3 +25,24 @@ export function relativeTime(unixSeconds: number, now = Date.now() / 1000) {
   const m = mins % 60;
   return m ? `in ${h}h ${m}m` : `in ${h}h`;
 }
+
+/** Past-tense relative time for feed rows ("4 min ago"). */
+export function timeAgo(unixSeconds: number, now = Date.now() / 1000) {
+  const s = Math.max(0, Math.round(now - unixSeconds));
+  if (s < 60) return "just now";
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m} min ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  return `${d}d ago`;
+}
+
+/** Decimal string of a wei amount, truncated to `dp` places, trailing zeros dropped. */
+export const weiDecimal = (wei: bigint, dp: number) => trim(formatUnits(wei, 18), dp);
+
+/** "3.3 million" style count for the transactions estimate. */
+export const compactCount = (n: bigint) =>
+  new Intl.NumberFormat("en-US", { notation: "compact", compactDisplay: "long", maximumFractionDigits: 1 }).format(
+    Number(n),
+  );
