@@ -17,5 +17,6 @@
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "viem": "^2.57.19"
-  }
+  },
+  "packageManager": "pnpm@12.10.1"
 }
