@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Console } from "@/components/Console";
+import { Cursor } from "@/components/Cursor";
 import { Hero } from "@/components/Hero";
 import { Nav } from "@/components/Nav";
 import { Developers, Feed, Footer, HowItWorks } from "@/components/Sections";
@@ -55,6 +56,7 @@ export default function Home() {
         <Feed stats={s.stats} events={s.events} />
       </main>
       <Footer config={s.config} />
+      <Cursor />
     </>
   );
 }

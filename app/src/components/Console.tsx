@@ -133,8 +133,13 @@ function OrderBody({ s }: { s: RefuelState }) {
         <div className="spacer" />
         {hasWallet === false ? (
           <>
-            <a className="btn btn-primary btn-lg" href="https://metamask.io/download/" target="_blank" rel="noreferrer">
-              Install MetaMask
+            <a
+              className="btn btn-primary btn-lg btn-alive"
+              href="https://metamask.io/download/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span>Install MetaMask</span>
             </a>
             <p className="fine">No wallet found in this browser. Install one, then reload this page.</p>
           </>

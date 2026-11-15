@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import type { ConfigResponse, RefuelEvent } from "@/lib/schemas";
 import { shortAddr, timeAgo, weiDecimal } from "@/lib/format";
 import type { Stats } from "@/hooks/useRefuel";
@@ -8,37 +11,87 @@ const REFUEL = "0xb5D2f0E4A19bfdd422Ec285BD82F951583D5a912";
 const MUSD = "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503";
 const GITHUB = "https://github.com/Cage4D/refuel";
 
+/** Adds `in` to the element once it scrolls into view (immediately with reduced motion). */
+function useReveal<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+      el.classList.add("in");
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          el.classList.add("in");
+          io.disconnect();
+        }
+      },
+      { threshold: 0.25 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return ref;
+}
+
+const STEPS = [
+  {
+    title: "You sign a permit",
+    tag: "Free",
+    body: (
+      <>
+        An EIP-2612 signature lets Refuel take the MUSD amount you picked. It&apos;s a signature, not a transaction, so
+        it costs nothing.
+      </>
+    ),
+  },
+  {
+    title: "The relayer sends it",
+    tag: "Relayer pays gas",
+    body: (
+      <>
+        Our relayer submits <code>refuelWithPermit</code> and pays the gas. It can&apos;t change where the BTC goes:
+        only to the wallet that signed.
+      </>
+    ),
+  },
+  {
+    title: "BTC lands in your wallet",
+    tag: "Native BTC",
+    body: (
+      <>
+        The contract prices BTC with Mezo&apos;s PriceFeed and sends native BTC. Your next transaction pays its own
+        gas.
+      </>
+    ),
+  },
+];
+
 export function HowItWorks() {
+  const ref = useReveal<HTMLOListElement>();
   return (
-    <section id="how" className="section">
+    <section id="how" className="section glow-section">
       <div className="wrap">
         <hr className="rule" />
-        <h2 className="h2 after-rule">One signature, no gas</h2>
-        <ol className="how">
-          <li>
-            <div className="n" aria-hidden="true">1</div>
-            <h3>You sign a permit</h3>
-            <p>
-              An EIP-2612 signature lets Refuel take the MUSD amount you picked. It&apos;s a signature, not a
-              transaction, so it costs nothing.
-            </p>
-          </li>
-          <li>
-            <div className="n" aria-hidden="true">2</div>
-            <h3>The relayer sends it</h3>
-            <p>
-              Our relayer submits <code>refuelWithPermit</code> and pays the gas. It can&apos;t change where the BTC
-              goes: only to the wallet that signed.
-            </p>
-          </li>
-          <li>
-            <div className="n" aria-hidden="true">3</div>
-            <h3>BTC lands in your wallet</h3>
-            <p>
-              The contract prices BTC with Mezo&apos;s PriceFeed and sends native BTC. Your next transaction pays its
-              own gas.
-            </p>
-          </li>
+        <h2 className="h2 after-rule">
+          One signature, <span className="hl">no gas</span>
+        </h2>
+        <ol className="how reveal" ref={ref}>
+          {STEPS.map((st, i) => (
+            <li key={st.title} style={{ ["--i" as string]: i }}>
+              <div className="n" aria-hidden="true">
+                {i + 1}
+              </div>
+              <span className="tag">
+                <i aria-hidden="true" />
+                {st.tag}
+              </span>
+              <h3>{st.title}</h3>
+              <p>{st.body}</p>
+            </li>
+          ))}
         </ol>
       </div>
     </section>
@@ -48,42 +101,77 @@ export function HowItWorks() {
 export function Developers({ config }: { config: ConfigResponse | null }) {
   const refuel = config?.refuel ?? REFUEL;
   const refuelUrl = config?.refuelUrl ?? `https://explorer.test.mezo.org/address/${REFUEL}`;
+  const explorer = config?.explorerUrl ?? "https://explorer.test.mezo.org";
+  const ref = useReveal<HTMLDivElement>();
+  const contracts = [
+    { k: "Refuel", v: refuel, href: refuelUrl, verified: true },
+    { k: "MUSD", v: config?.musd.address ?? MUSD, href: `${explorer}/address/${config?.musd.address ?? MUSD}` },
+    { k: "PriceFeed", v: PRICE_FEED, href: `${explorer}/address/${PRICE_FEED}` },
+  ];
   return (
-    <section id="developers" className="section">
+    <section id="developers" className="section glow-section glow-left">
       <div className="wrap">
         <hr className="rule" />
-        <h2 className="h2 after-rule">Built on Mezo&apos;s own contracts</h2>
-        <div className="dev">
+        <h2 className="h2 after-rule">
+          Built on <span className="hl">Mezo&apos;s</span> own contracts
+        </h2>
+        <div className="dev reveal" ref={ref}>
           <div>
             <h3>What it touches</h3>
             <p>
               Refuel reads Mezo&apos;s PriceFeed, pulls MUSD through its built-in permit, and pays out native BTC. The
               contract is verified, so you can read every line.
             </p>
-            <dl className="kv num">
-              <dt>Refuel</dt>
-              <dd>
-                <a href={refuelUrl} target="_blank" rel="noreferrer">
-                  {refuel}
-                </a>
-              </dd>
-              <dt>MUSD</dt>
-              <dd>{config?.musd.address ?? MUSD}</dd>
-              <dt>PriceFeed</dt>
-              <dd>{PRICE_FEED}</dd>
-              <dt>Network</dt>
-              <dd>Mezo testnet, chain {config?.chainId ?? 31611}</dd>
-            </dl>
+            <ul className="contracts">
+              {contracts.map((c, i) => (
+                <li key={c.k} style={{ ["--i" as string]: i }}>
+                  <span className="ck">
+                    <i aria-hidden="true" />
+                    {c.k}
+                    {c.verified && <span className="verified">Verified</span>}
+                  </span>
+                  <a className="cv num" href={c.href} target="_blank" rel="noreferrer">
+                    {c.v}
+                  </a>
+                </li>
+              ))}
+              <li style={{ ["--i" as string]: 3 }}>
+                <span className="ck">
+                  <i aria-hidden="true" />
+                  Network
+                </span>
+                <span className="cv">Mezo testnet, chain {config?.chainId ?? 31611}</span>
+              </li>
+            </ul>
           </div>
           <div>
             <h3>Refuel your own users</h3>
             <p>Quote, have the user sign, then post the signature. Same API this page uses.</p>
-            <pre className="code">
-              <span className="c"># 1. quote and get the permit to sign</span>
-              {"\nGET  /api/quote?owner=0x…&amount=2\n"}
-              <span className="c"># 2. send the signature</span>
-              {`\nPOST /api/refuel\n{ "owner": "0x…", "amountIn": "2000000000000000000",\n  "deadline": "1794737000", "signature": "0x…" }`}
-            </pre>
+            <div className="term">
+              <div className="term-bar" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+                <span>refuel api</span>
+              </div>
+              <pre className="code">
+                <span className="c"># 1. quote and get the permit to sign</span>
+                {"\n"}
+                <span className="m">GET</span>
+                {"  /api/quote?owner=0x…&amount=2\n"}
+                <span className="c"># 2. send the signature</span>
+                {"\n"}
+                <span className="m">POST</span>
+                {" /api/refuel\n{ "}
+                <span className="k">&quot;owner&quot;</span>: <span className="s">&quot;0x…&quot;</span>,{" "}
+                <span className="k">&quot;amountIn&quot;</span>: <span className="s">&quot;2000000000000000000&quot;</span>
+                {",\n  "}
+                <span className="k">&quot;deadline&quot;</span>: <span className="s">&quot;1794737000&quot;</span>,{" "}
+                <span className="k">&quot;signature&quot;</span>: <span className="s">&quot;0x…&quot;</span>
+                {" }"}
+                <span className="caret" aria-hidden="true" />
+              </pre>
+            </div>
           </div>
         </div>
       </div>
