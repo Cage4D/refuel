@@ -54,6 +54,10 @@ const erc20 = parseAbi([
   "function balanceOf(address) view returns (uint256)",
 ]);
 
+// Mezo enforces the EIP-7623 calldata gas floor, but eth_estimateGas can return less than it for
+// small ERC-20 transfers, so set an explicit limit (gas is ~150 wei, so this costs next to nothing).
+const TRANSFER_GAS = 100_000n;
+
 const WALLETS_FILE = resolve(root, "scripts/.demo-wallets.json");
 
 type Row = { wallet: Address; refuelTx: string; btcOut: string; followUpTx: string };
@@ -82,7 +86,7 @@ async function main() {
   const funderBal = await pub.readContract({ address: MUSD, abi: erc20, functionName: "balanceOf", args: [funder.account.address] });
   if (funderBal < topUp * BigInt(COUNT)) throw new Error(`funder needs ${formatEther(topUp * BigInt(COUNT))} MUSD`);
   for (const w of fresh) {
-    const hash = await funder.writeContract({ address: MUSD, abi: erc20, functionName: "transfer", args: [w.address, topUp] });
+    const hash = await funder.writeContract({ address: MUSD, abi: erc20, functionName: "transfer", args: [w.address, topUp], gas: TRANSFER_GAS });
     await pub.waitForTransactionReceipt({ hash });
     const btc = await pub.getBalance({ address: w.address });
     console.log(`funded ${w.address} with ${formatEther(topUp)} MUSD (BTC balance: ${formatEther(btc)})`);
@@ -126,6 +130,7 @@ async function main() {
       abi: erc20,
       functionName: "transfer",
       args: [account.address, parseUnits("0.1", 18)],
+      gas: TRANSFER_GAS,
     });
     const rc = await pub.waitForTransactionReceipt({ hash: follow });
     if (rc.status !== "success") throw new Error(`follow-up tx failed: ${follow}`);

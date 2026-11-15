@@ -225,6 +225,8 @@ export default function Home() {
         abi: erc20,
         functionName: "transfer",
         args: [account, parseUnits("0.1", 18)],
+        // Mezo enforces the EIP-7623 calldata floor; estimates can fall just below it.
+        gas: 100_000n,
       });
       await createPublicClient({ chain, transport: http() }).waitForTransactionReceipt({ hash });
       setTryPhase({ kind: "done", hash });

@@ -67,12 +67,13 @@ sequenceDiagram
 
 | What | Address |
 |---|---|
-| Refuel (verified) | _pending deploy_ |
+| Refuel (verified on [explorer](https://explorer.test.mezo.org/address/0xb5D2f0E4A19bfdd422Ec285BD82F951583D5a912?tab=contract) and [Sourcify](https://repo.sourcify.dev/31611/0xb5D2f0E4A19bfdd422Ec285BD82F951583D5a912)) | [`0xb5D2f0E4A19bfdd422Ec285BD82F951583D5a912`](https://explorer.test.mezo.org/address/0xb5D2f0E4A19bfdd422Ec285BD82F951583D5a912) |
 | MUSD | [`0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503`](https://explorer.test.mezo.org/address/0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503) |
 | PriceFeed (resolved through TroveManager) | [`0x86bCF0841622a5dAC14A313a15f96A95421b9366`](https://explorer.test.mezo.org/address/0x86bCF0841622a5dAC14A313a15f96A95421b9366) |
 | TroveManager | [`0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0`](https://explorer.test.mezo.org/address/0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0) |
-| Relayer | _pending_ |
-| Deploy block | _pending_ |
+| Relayer | [`0xA2945e0841D93fDE3738397F26c0E5de6C40eC10`](https://explorer.test.mezo.org/address/0xA2945e0841D93fDE3738397F26c0E5de6C40eC10) |
+| Owner / deployer | [`0x4EA77A60204b20f9aB7b1E35Bb8922606C8A0362`](https://explorer.test.mezo.org/address/0x4EA77A60204b20f9aB7b1E35Bb8922606C8A0362) |
+| Deploy block | [16793627](https://explorer.test.mezo.org/block/16793627) |
 
 `contracts/deployments/31611.json` has the machine-readable copy.
 
@@ -150,3 +151,13 @@ The script creates new keys and saves them to `scripts/.demo-wallets.json`, whic
 ## On-chain proof
 
 <!-- demo-proof -->
+
+_Run 2026-11-15T09:44:36.148Z via `pnpm demo --count 4 --amount 2`_
+
+| Wallet | Refuel tx | BTC received | Follow-up tx (own gas) |
+|---|---|---|---|
+| [`0x0A009A…4e45`](https://explorer.test.mezo.org/address/0x0A009AA8381b550FCfD7c7eb1320490F28B14e45) | [0xa263cbe6…](https://explorer.test.mezo.org/tx/0xa263cbe6f60490ae19e4bc26170ce680a4d0425b65c530e5c4b79716a4f9cae9) | 0.00002919967026601 | [0x86bfcad2…](https://explorer.test.mezo.org/tx/0x86bfcad2a98fd4b3ca8b5a6868d3c86e2d0c990e2d02be2b904175daf48ee829) |
+| [`0x71c828…E20c`](https://explorer.test.mezo.org/address/0x71c8286e1eE89a07c80025A6f8B059Fc2566E20c) | [0xd46c3e71…](https://explorer.test.mezo.org/tx/0xd46c3e71b7445d71aa7146f1f8742e0ddeb480eb6a63183116567224e2888f3e) | 0.000029191592576006 | [0x0c67c51a…](https://explorer.test.mezo.org/tx/0x0c67c51a49cfea78e7eaf54e014b98cc87d293bcf993ba538168cff3ef48b684) |
+| [`0xD32339…1c5e`](https://explorer.test.mezo.org/address/0xD3233982072CA4eF1c1B0B7f8b3B088367471c5e) | [0x672cc1b2…](https://explorer.test.mezo.org/tx/0x672cc1b2e9c169943d9c77e92fee407bc468f754ee1f3612b3c12351d7692a5d) | 0.000029184305536148 | [0xe8c65c90…](https://explorer.test.mezo.org/tx/0xe8c65c90d7c38b25ad49d82764c2d4de3848b75753798966cdc8619174d9f77f) |
+| [`0x908dC9…cb25`](https://explorer.test.mezo.org/address/0x908dC9328239bC5A724B83F2BBA40F1e4C13cb25) | [0x2ae1cb22…](https://explorer.test.mezo.org/tx/0x2ae1cb22b059a30b0999b0a798ca809bf831ca2f82f30d15df43f070ffd6985e) | 0.000029182068372218 | [0xd88c5d4b…](https://explorer.test.mezo.org/tx/0xd88c5d4b27b83cf4858b6d1a68ec35e92b3f1c6d2ffda2ffe76c81e9f29ad69a) |
+
