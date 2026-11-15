@@ -12,10 +12,12 @@
     "next": "15.5.29",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "server-only": "^0.0.1",
     "viem": "^2.57.19",
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@next/env": "15.5.29",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
