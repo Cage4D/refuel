@@ -115,6 +115,7 @@ export function Feed({ stats, events }: { stats: Stats | null; events: RefuelEve
         {rows.length === 0 ? (
           <p className="empty-feed">No refuels yet.</p>
         ) : (
+          <div className="feed-wrap">
           <table className="feed-table">
             <thead>
               <tr>
@@ -141,6 +142,7 @@ export function Feed({ stats, events }: { stats: Stats | null; events: RefuelEve
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </section>
