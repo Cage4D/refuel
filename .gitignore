@@ -1,0 +1,21 @@
+# env / secrets
+.env
+.env.*
+!.env.example
+scripts/.demo-wallets.json
+
+# node
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+
+# foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/*/31337/
+contracts/broadcast/**/dry-run/
+
+.DS_Store

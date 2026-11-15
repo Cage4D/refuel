@@ -1,0 +1,21 @@
+{
+  "name": "refuel",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --filter app dev",
+    "build": "pnpm --filter app build",
+    "typecheck": "pnpm --filter app typecheck && tsc -p scripts --noEmit",
+    "abi": "tsx scripts/gen-abi.ts",
+    "demo": "tsx scripts/demo-fresh-wallets.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "viem": "^2.57.19"
+  }
+}
