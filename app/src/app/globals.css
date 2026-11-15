@@ -1,47 +1,89 @@
 @import "tailwindcss";
 
-:root {
-  --background: #f7f5f2;
-  --foreground: #1a1714;
-  --card: #ffffff;
-  --muted: #6f6860;
-  --line: #e7e2db;
-  --accent: #f7931a;
-  --accent-ink: #1a1714;
-  --danger: #c2410c;
-  --ok: #15803d;
+@theme {
+  --color-void: #000000;       /* page ground, true black */
+  --color-hull: #0e0e10;       /* the one raised surface: console, code, state cards */
+  --color-seam: #232328;       /* hairlines, dividers, inactive step bars, gauge track */
+  --color-rim: #62626b;        /* outline button/chip/badge borders, hero leader lines (3:1) */
+  --color-bone: #ecece6;       /* primary text, sphere dots, primary button fill */
+  --color-ash: #9a9aa3;        /* secondary text */
+  --color-ember: #f7931a;      /* BTC only (+ the ShinyButton sweep) */
+  --color-ember-soft: #ffb15e; /* ShinyButton hover shine only */
+  --color-empty: #ff5c4d;      /* zero BTC, errors */
+
+  --font-display: var(--font-iceland), "Geist", system-ui, sans-serif;
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+
+  --radius-ctl: 999px;   /* pills: buttons, chips, badges */
+  --radius-field: 12px;  /* code blocks, banners */
+  --radius-panel: 20px;  /* console, state cards */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f0e0d;
-    --foreground: #f1ede8;
-    --card: #191715;
-    --muted: #9a928a;
-    --line: #2b2724;
-    --accent: #f7931a;
-    --accent-ink: #1a1714;
-    --danger: #f97316;
-    --ok: #4ade80;
-  }
+html {
+  background: var(--color-void);
+  color: var(--color-bone);
+  color-scheme: dark;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
 }
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-muted: var(--muted);
-  --color-line: var(--line);
-  --color-accent: var(--accent);
-  --color-accent-ink: var(--accent-ink);
-  --color-danger: var(--danger);
-  --color-ok: var(--ok);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  background: var(--color-void);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+:focus-visible { outline: 2px solid var(--color-bone); outline-offset: 3px; border-radius: 6px; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* No-WebGL fallback for the hero sphere. */
+canvas[data-fallback] { background: url(/particle-sphere.png) center / contain no-repeat; }
+
+/* ---------- shared controls ---------- */
+@layer components {
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+  @media (max-width: 900px) { .wrap { padding: 0 24px; } }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px;
+    border: 1px solid var(--color-rim); border-radius: var(--radius-ctl);
+    font-size: 12.5px; color: var(--color-ash); white-space: nowrap;
+  }
+  .badge i { width: 6px; height: 6px; border-radius: 50%; background: var(--color-ember); }
+
+  .btn {
+    white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 44px; padding: 0 22px; border-radius: var(--radius-ctl);
+    font: 500 15px/1 var(--font-sans); cursor: pointer; text-decoration: none;
+    border: 1px solid transparent; transition: background .15s, border-color .15s, color .15s;
+  }
+  .btn-primary { background: var(--color-bone); color: #000; }
+  .btn-primary:hover { background: #fff; }
+  .btn-outline { border-color: var(--color-rim); color: var(--color-bone); background: transparent; }
+  .btn-outline:hover { border-color: var(--color-bone); }
+  .btn-sm { height: 36px; padding: 0 16px; font-size: 14px; }
+  .btn-lg { height: 56px; padding: 0 30px; font-size: 16px; }
+  .btn[disabled] { background: var(--color-seam); color: var(--color-ash); border-color: transparent; cursor: not-allowed; }
+  /* keep 44px touch target for the small nav button */
+  .btn-sm { min-height: 36px; }
+  @media (pointer: coarse) { .btn-sm { height: 44px; } }
+
+  .link { color: var(--color-ash); font-size: 15px; text-decoration: underline; text-underline-offset: 4px; }
+  .link:hover { color: var(--color-bone); }
+
+  .h2 { font-family: var(--font-display); font-size: clamp(40px, 4.8vw, 68px); line-height: .95; font-weight: 400; max-width: 24ch; }
+  .sub { color: var(--color-ash); max-width: 52ch; margin-top: 16px; }
+
+  .spin {
+    width: 18px; height: 18px; border-radius: 50%; display: inline-block;
+    border: 2px solid #0004; border-top-color: #000; animation: spin .8s linear infinite;
+  }
+  .btn[disabled] .spin { border-color: #9a9aa344; border-top-color: var(--color-ash); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spin { animation-duration: 2.4s; } }
 }

@@ -1,0 +1,193 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Refuel console states</title><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Iceland&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:"Iceland";src:url(iceland-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Geist";src:url(geist-sans-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Geist";src:url(geist-sans-latin-500-normal.woff2) format("woff2");font-weight:500;font-display:swap}
+
+:root{
+  /* color */
+  --void:#000000;      /* page ground */
+  --hull:#0e0e10;      /* the one raised surface: the console */
+  --seam:#232328;      /* hairlines, dividers */
+  --rim:#62626b;       /* control borders, focus-adjacent */
+  --bone:#ecece6;      /* primary text, the sphere */
+  --ash:#9a9aa3;       /* secondary text */
+  --ember:#f7931a;     /* BTC / fuel — only ever means BTC */
+  --ember-dim:#7a4a0f; /* ember fills at rest (gauge track) */
+  --empty:#ff5c4d;     /* zero BTC, errors */
+  /* type */
+  --font-display:"Iceland", "Geist", system-ui, sans-serif;
+  --font-text:"Geist", system-ui, sans-serif;
+  /* space (4px base) */
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:72px;--s9:120px;
+  /* radius */
+  --r-ctl:999px;   /* pills: buttons, chips, badges */
+  --r-panel:20px;  /* the console */
+  --r-field:12px;  /* inputs, code */
+  --ease-out:cubic-bezier(.2,.7,.1,1);
+}
+*{box-sizing:border-box;margin:0}
+html{background:var(--void);color:var(--bone);font-family:var(--font-text);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--bone);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 var(--s6)}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- nav ---------- */
+.nav{display:flex;align-items:center;gap:var(--s6);height:76px}
+.brand{display:flex;align-items:center;gap:var(--s2);font-family:var(--font-display);font-size:28px;letter-spacing:.02em;text-decoration:none}
+.brand-mark{width:22px;height:22px}
+.nav-links{display:flex;gap:var(--s5);margin-left:auto;font-size:14px;color:var(--ash)}
+.nav-links a{text-decoration:none}
+.nav-links a:hover{color:var(--bone)}
+.nav-actions{display:flex;align-items:center;gap:var(--s3)}
+
+/* ---------- controls ---------- */
+.badge{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border:1px solid var(--rim);border-radius:var(--r-ctl);font-size:12.5px;color:var(--ash)}
+.badge i{width:6px;height:6px;border-radius:50%;background:var(--ember)}
+.btn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);height:44px;padding:0 22px;border-radius:var(--r-ctl);font:500 15px/1 var(--font-text);cursor:pointer;text-decoration:none;border:1px solid transparent;transition:background .15s,border-color .15s,color .15s}
+.btn-primary{background:var(--bone);color:#000}
+.btn-primary:hover{background:#fff}
+.btn-outline{border-color:var(--rim);color:var(--bone);background:transparent}
+.btn-outline:hover{border-color:var(--bone)}
+.btn-sm{height:36px;padding:0 16px;font-size:14px}
+.btn-lg{height:56px;padding:0 30px;font-size:16px}
+.link{color:var(--ash);font-size:15px;text-underline-offset:4px}
+.link:hover{color:var(--bone)}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:calc(100vh - 76px);display:grid;grid-template-columns:6fr 6fr;align-items:center}
+.hero-copy{position:relative;z-index:2;padding-bottom:var(--s8)}
+.display-xl{font-family:var(--font-display);font-weight:400;font-size:clamp(46px,5.7vw,92px);line-height:.95;white-space:nowrap;letter-spacing:.005em}
+.lead{max-width:40ch;margin-top:var(--s5);font-size:18px;color:var(--ash)}
+.hero-cta{display:flex;align-items:center;gap:var(--s5);margin-top:var(--s6)}
+.stage{position:relative;height:min(760px,92vh);margin-right:calc(-1 * var(--s6))}
+#sphere{position:absolute;inset:0;width:100%;height:100%}
+.note{position:absolute;font-size:13px;color:var(--ash);line-height:1.35;pointer-events:none}
+.note b{display:block;font-weight:500;color:var(--bone);font-size:14px}
+.note b.btc{color:var(--ember)}
+.leader{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.leader path{fill:none;stroke:var(--rim);stroke-width:1}
+.leader circle{fill:var(--bone)}
+
+/* ---------- section scaffolding ---------- */
+section{padding:var(--s9) 0}
+.h2{font-family:var(--font-display);font-size:clamp(40px,4.8vw,68px);line-height:.95;font-weight:400;max-width:24ch}
+.sub{color:var(--ash);max-width:52ch;margin-top:var(--s4)}
+.rule{border:0;border-top:1px solid var(--seam)}
+
+/* ---------- console ---------- */
+.console{margin-top:var(--s7);background:var(--hull);border:1px solid var(--seam);border-radius:var(--r-panel);display:grid;grid-template-columns:1fr 1.15fr}
+.console > div{padding:var(--s6)}
+.console .wallet{border-right:1px solid var(--seam);display:flex;flex-direction:column;gap:var(--s5)}
+.who{display:flex;align-items:center;justify-content:space-between;font-size:14px;color:var(--ash)}
+.who .addr{color:var(--bone)}
+.readout{display:flex;flex-direction:column;gap:2px}
+.readout .label{font-size:13px;color:var(--ash)}
+.readout .val{font-family:var(--font-display);font-size:120px;line-height:.95;font-variant-numeric:tabular-nums}
+.readout .val small{font-size:28px;color:var(--ash);margin-left:6px}
+.readout.zero .val{color:var(--empty)}
+.readout .hint{font-size:13px;color:var(--empty)}
+.readout.musd .val{font-size:64px}
+.gauge{margin-top:auto}
+.gauge .track{height:6px;border-radius:999px;background:var(--seam);overflow:hidden}
+.gauge .fill{height:100%;width:61%;background:var(--ember)}
+.gauge p{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ash);margin-top:var(--s2)}
+
+.order{display:flex;flex-direction:column;gap:var(--s5)}
+.order h3{font-weight:500;font-size:15px}
+.chips{display:flex;gap:var(--s2)}
+.chip{height:52px;min-width:88px;padding:0 var(--s5);border-radius:var(--r-ctl);border:1px solid var(--rim);background:transparent;color:var(--bone);font:400 28px/1 var(--font-display);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--bone);color:#000;border-color:var(--bone)}
+.chip span{font:400 13px var(--font-text);margin-left:4px;opacity:.7}
+.quote{border-top:1px solid var(--seam);padding-top:var(--s5);display:grid;grid-template-columns:1fr auto;row-gap:var(--s3);font-size:14px}
+.quote dt{color:var(--ash)}
+.quote dd{text-align:right;font-variant-numeric:tabular-nums}
+.quote .get dd{font-family:var(--font-display);font-size:40px;line-height:1;color:var(--ember)}
+.quote .get dt{align-self:end;color:var(--bone);font-weight:500}
+.quote .muted{font-size:12px;color:var(--ash);grid-column:1/-1}
+.steps{padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2);font-size:13px;color:var(--ash)}
+.steps li{list-style:none;border-top:2px solid var(--seam);padding-top:var(--s2)}
+.steps li.done{border-color:var(--bone);color:var(--bone)}
+.steps li.now{border-color:var(--ember);color:var(--bone)}
+.order .btn-lg{width:100%}
+.fine{font-size:12.5px;color:var(--ash)}
+
+/* ---------- how ---------- */
+.how{padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s6);margin-top:var(--s8);position:relative}
+.how li{list-style:none;position:relative}
+.how .n{font-family:var(--font-display);font-size:96px;line-height:.8;color:var(--seam);-webkit-text-stroke:1px var(--rim)}
+.how h3{font-weight:500;font-size:18px;margin-top:var(--s4)}
+.how p{color:var(--ash);margin-top:var(--s2);max-width:34ch;font-size:15px}
+.how code{font-size:13px;color:var(--bone)}
+
+/* ---------- developers ---------- */
+.dev{display:grid;grid-template-columns:1fr 1fr;gap:var(--s8);margin-top:var(--s7)}
+.dev h3{font-weight:500;font-size:18px}
+.dev p{color:var(--ash);font-size:15px;margin-top:var(--s2)}
+.kv{margin-top:var(--s5);display:grid;grid-template-columns:auto 1fr;gap:var(--s3) var(--s5);font-size:14px}
+.kv dt{color:var(--ash)}
+.kv dd{word-break:break-all}
+.kv a{text-underline-offset:3px}
+pre{margin-top:var(--s5);background:var(--hull);border:1px solid var(--seam);border-radius:var(--r-field);padding:var(--s5);font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--bone);overflow:auto}
+pre .c{color:var(--ash)}
+
+/* ---------- feed ---------- */
+.stats{display:flex;gap:var(--s8);margin-top:var(--s7)}
+.stat .v{font-family:var(--font-display);font-size:64px;line-height:.9;font-variant-numeric:tabular-nums}
+.stat .v.btc{color:var(--ember)}
+.stat .k{font-size:13px;color:var(--ash);margin-top:var(--s1)}
+table{width:100%;border-collapse:collapse;margin-top:var(--s7);font-size:14px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-weight:400;color:var(--ash);font-size:13px;padding:0 0 var(--s3);border-bottom:1px solid var(--seam)}
+td{padding:var(--s4) 0;border-bottom:1px solid var(--seam)}
+td.btc{color:var(--ember)}
+td a{color:var(--ash);text-underline-offset:3px}
+th:last-child,td:last-child{text-align:right}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--seam);padding:var(--s6) 0 var(--s7)}
+footer .wrap{display:flex;align-items:center;gap:var(--s5);font-size:13.5px;color:var(--ash)}
+footer .sp{margin-left:auto;display:flex;gap:var(--s5)}
+
+@media (max-width: 900px){
+  .wrap{padding:0 var(--s5)}
+  .nav-links{display:none}
+  .hero{grid-template-columns:1fr;min-height:auto}
+  .stage{order:-1;height:420px;margin:0 calc(-1 * var(--s5))}
+  .stage .note,.stage .leader{display:none}
+  .console{grid-template-columns:1fr}
+  .console .wallet{border-right:0;border-bottom:1px solid var(--seam)}
+  .how,.dev{grid-template-columns:1fr}
+  .stats{gap:var(--s6);flex-wrap:wrap}
+  .hide-sm{display:none}
+  section{padding:var(--s8) 0}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style><style>
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s5);padding:var(--s6)}
+.card{background:var(--hull);border:1px solid var(--seam);border-radius:var(--r-panel);padding:var(--s6);display:flex;flex-direction:column;gap:var(--s4);min-height:430px}
+.tag{font-size:12.5px;color:var(--ash)}
+.state-title{font-family:var(--font-display);font-size:34px;line-height:1}
+.msg{font-size:14px;color:var(--ash)}
+.msg.err{color:var(--empty)}
+.spin{width:18px;height:18px;border:2px solid #0004;border-top-color:#000;border-radius:50%;display:inline-block}
+.btn[disabled]{background:var(--seam);color:var(--ash);cursor:not-allowed}
+.big{font-family:var(--font-display);font-size:64px;line-height:.95;color:var(--ember);font-variant-numeric:tabular-nums}
+.banner{border:1px solid var(--rim);border-radius:var(--r-field);padding:var(--s3) var(--s4);font-size:14px}
+.spacer{margin-top:auto}
+h1.page{font-family:var(--font-display);font-size:56px;font-weight:400;padding:var(--s6) var(--s6) 0}
+</style></head><body><h1 class="page">Console states</h1>
+<div class="board">
+ <div class="card"><span class="tag">State 1: Not connected</span><div class="state-title">Connect a wallet to see your balances</div><p class="msg">Refuel works with any browser wallet. We'll add Mezo testnet for you.</p><div class="spacer"></div><button class="btn btn-primary btn-lg">Connect wallet</button><p class="fine">No wallet? <a href="#">Install MetaMask</a></p></div>
+ <div class="card"><span class="tag">State 2: Wrong network</span><div class="state-title">Switch to Mezo testnet</div><p class="msg">Your wallet is on another network. Switching is free and takes one click.</p><div class="spacer"></div><button class="btn btn-primary btn-lg">Switch to Mezo testnet</button></div>
+ <div class="card"><span class="tag">State 3: Ready (0 BTC)</span><div class="readout zero"><span class="label">BTC for gas</span><span class="val num" style="font-size:96px">0<small>BTC</small></span><span class="hint">You can't send transactions yet.</span></div><div class="spacer"></div><div class="chips"><button class="chip">1<span>MUSD</span></button><button class="chip" aria-pressed="true">2<span>MUSD</span></button><button class="chip">5<span>MUSD</span></button></div><button class="btn btn-primary btn-lg">Sign and refuel</button></div>
+ <div class="card"><span class="tag">State 4: Waiting for signature</span><ol class="steps"><li class="now">Sign the permit</li><li>Relayer sends it</li><li>BTC received</li></ol><div class="state-title">Check your wallet</div><p class="msg">Approve the signature request. It's free and doesn't send a transaction.</p><div class="spacer"></div><button class="btn btn-primary btn-lg" disabled>Waiting for signature…</button><a class="link" href="#">Cancel</a></div>
+ <div class="card"><span class="tag">State 5: Relaying</span><ol class="steps"><li class="done">Sign the permit</li><li class="now">Relayer sends it</li><li>BTC received</li></ol><div class="state-title">Sending your refuel</div><p class="msg">The relayer is paying the gas. This takes 2 to 6 seconds.</p><div class="spacer"></div><button class="btn btn-primary btn-lg"><span class="spin"></span>Refueling</button></div>
+ <div class="card"><span class="tag">State 6: Received</span><ol class="steps"><li class="done">Sign the permit</li><li class="done">Relayer sends it</li><li class="done" style="border-color:var(--ember)">BTC received</li></ol><span class="msg">You received</span><div class="big">0.00002922<br>BTC</div><a class="link" href="#">View transaction on the explorer</a><div class="spacer"></div><button class="btn btn-outline btn-lg">Now try it: send 0.1 MUSD to yourself</button><p class="fine">Your wallet pays this one with its own BTC.</p></div>
+ <div class="card"><span class="tag">State 7: Cooldown</span><div class="state-title">You refueled recently</div><p class="msg">Try again in 21 hours. Each wallet gets 3 refuels, one every 24 hours.</p><div class="spacer"></div><button class="btn btn-primary btn-lg" disabled>Sign and refuel</button></div>
+ <div class="card"><span class="tag">State 8: Signature cancelled</span><div class="state-title">Signature cancelled</div><p class="msg">Nothing happened, and nothing left your wallet.</p><div class="spacer"></div><button class="btn btn-primary btn-lg">Sign and refuel</button></div>
+ <div class="card"><span class="tag">State 9: Service banner</span><div class="banner">The refuel tank is empty right now. Try again later.</div><p class="msg err">Errors show the API's message as-is, here or under the button.</p><div class="spacer"></div><button class="btn btn-primary btn-lg" disabled>Sign and refuel</button></div>
+</div></body></html>

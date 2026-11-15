@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Refuel — gas for your Bitcoin dollars on Mezo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Iceland&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:"Iceland";src:url(iceland-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Geist";src:url(geist-sans-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Geist";src:url(geist-sans-latin-500-normal.woff2) format("woff2");font-weight:500;font-display:swap}
+
+:root{
+  /* color */
+  --void:#000000;      /* page ground */
+  --hull:#0e0e10;      /* the one raised surface: the console */
+  --seam:#232328;      /* hairlines, dividers */
+  --rim:#62626b;       /* control borders, focus-adjacent */
+  --bone:#ecece6;      /* primary text, the sphere */
+  --ash:#9a9aa3;       /* secondary text */
+  --ember:#f7931a;     /* BTC / fuel — only ever means BTC */
+  --ember-dim:#7a4a0f; /* ember fills at rest (gauge track) */
+  --empty:#ff5c4d;     /* zero BTC, errors */
+  /* type */
+  --font-display:"Iceland", "Geist", system-ui, sans-serif;
+  --font-text:"Geist", system-ui, sans-serif;
+  /* space (4px base) */
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:72px;--s9:120px;
+  /* radius */
+  --r-ctl:999px;   /* pills: buttons, chips, badges */
+  --r-panel:20px;  /* the console */
+  --r-field:12px;  /* inputs, code */
+  --ease-out:cubic-bezier(.2,.7,.1,1);
+}
+*{box-sizing:border-box;margin:0}
+html{background:var(--void);color:var(--bone);font-family:var(--font-text);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body{overflow-x:hidden}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--bone);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 var(--s6)}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- nav ---------- */
+.nav{display:flex;align-items:center;gap:var(--s6);height:76px}
+.brand{display:flex;align-items:center;gap:var(--s2);font-family:var(--font-display);font-size:28px;letter-spacing:.02em;text-decoration:none}
+.brand-mark{width:22px;height:22px}
+.nav-links{display:flex;gap:var(--s5);margin-left:auto;font-size:14px;color:var(--ash)}
+.nav-links a{text-decoration:none}
+.nav-links a:hover{color:var(--bone)}
+.nav-actions{display:flex;align-items:center;gap:var(--s3)}
+
+/* ---------- controls ---------- */
+.badge{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border:1px solid var(--rim);border-radius:var(--r-ctl);font-size:12.5px;color:var(--ash)}
+.badge i{width:6px;height:6px;border-radius:50%;background:var(--ember)}
+.btn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);height:44px;padding:0 22px;border-radius:var(--r-ctl);font:500 15px/1 var(--font-text);cursor:pointer;text-decoration:none;border:1px solid transparent;transition:background .15s,border-color .15s,color .15s}
+.btn-primary{background:var(--bone);color:#000}
+.btn-primary:hover{background:#fff}
+.btn-outline{border-color:var(--rim);color:var(--bone);background:transparent}
+.btn-outline:hover{border-color:var(--bone)}
+.btn-sm{height:36px;padding:0 16px;font-size:14px}
+.btn-lg{height:56px;padding:0 30px;font-size:16px}
+.link{color:var(--ash);font-size:15px;text-underline-offset:4px}
+.link:hover{color:var(--bone)}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:calc(100vh - 76px);display:grid;grid-template-columns:6fr 6fr;align-items:center}
+.hero-copy{position:relative;z-index:2;padding-bottom:var(--s8)}
+.display-xl{font-family:var(--font-display);font-weight:400;font-size:clamp(46px,5.7vw,92px);line-height:.95;white-space:nowrap;letter-spacing:.005em}
+.lead{max-width:40ch;margin-top:var(--s5);font-size:18px;color:var(--ash)}
+.hero-cta{display:flex;align-items:center;gap:var(--s5);margin-top:var(--s6)}
+.stage{position:relative;height:min(760px,92vh);margin-right:calc(-1 * var(--s6))}
+#sphere{position:absolute;inset:0;width:100%;height:100%}
+.note{position:absolute;font-size:13px;color:var(--ash);line-height:1.35;pointer-events:none}
+.note b{display:block;font-weight:500;color:var(--bone);font-size:14px}
+.note b.btc{color:var(--ember)}
+.leader{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.leader path{fill:none;stroke:var(--rim);stroke-width:1}
+.leader circle{fill:var(--bone)}
+
+/* ---------- section scaffolding ---------- */
+section{padding:var(--s9) 0}
+.h2{font-family:var(--font-display);font-size:clamp(40px,4.8vw,68px);line-height:.95;font-weight:400;max-width:24ch}
+.sub{color:var(--ash);max-width:52ch;margin-top:var(--s4)}
+.rule{border:0;border-top:1px solid var(--seam)}
+
+/* ---------- console ---------- */
+.console{margin-top:var(--s7);background:var(--hull);border:1px solid var(--seam);border-radius:var(--r-panel);display:grid;grid-template-columns:1fr 1.15fr}
+.console > div{padding:var(--s6)}
+.console .wallet{border-right:1px solid var(--seam);display:flex;flex-direction:column;gap:var(--s5)}
+.who{display:flex;align-items:center;justify-content:space-between;font-size:14px;color:var(--ash)}
+.who .addr{color:var(--bone)}
+.readout{display:flex;flex-direction:column;gap:2px}
+.readout .label{font-size:13px;color:var(--ash)}
+.readout .val{font-family:var(--font-display);font-size:120px;line-height:.95;font-variant-numeric:tabular-nums}
+.readout .val small{font-size:28px;color:var(--ash);margin-left:6px}
+.readout.zero .val{color:var(--empty)}
+.readout .hint{font-size:13px;color:var(--empty)}
+.readout.musd .val{font-size:64px}
+.gauge{margin-top:auto}
+.gauge .track{height:6px;border-radius:999px;background:var(--seam);overflow:hidden}
+.gauge .fill{height:100%;width:61%;background:var(--ember)}
+.gauge p{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ash);margin-top:var(--s2)}
+
+.order{display:flex;flex-direction:column;gap:var(--s5)}
+.order h3{font-weight:500;font-size:15px}
+.chips{display:flex;gap:var(--s2)}
+.chip{height:52px;min-width:88px;padding:0 var(--s5);border-radius:var(--r-ctl);border:1px solid var(--rim);background:transparent;color:var(--bone);font:400 28px/1 var(--font-display);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--bone);color:#000;border-color:var(--bone)}
+.chip span{font:400 13px var(--font-text);margin-left:4px;opacity:.7}
+.quote{border-top:1px solid var(--seam);padding-top:var(--s5);display:grid;grid-template-columns:1fr auto;row-gap:var(--s3);font-size:14px}
+.quote dt{color:var(--ash)}
+.quote dd{text-align:right;font-variant-numeric:tabular-nums}
+.quote .get dd{font-family:var(--font-display);font-size:40px;line-height:1;color:var(--ember)}
+.quote .get dt{align-self:end;color:var(--bone);font-weight:500}
+.quote .muted{font-size:12px;color:var(--ash);grid-column:1/-1}
+.steps{padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2);font-size:13px;color:var(--ash)}
+.steps li{list-style:none;border-top:2px solid var(--seam);padding-top:var(--s2)}
+.steps li.done{border-color:var(--bone);color:var(--bone)}
+.steps li.now{border-color:var(--ember);color:var(--bone)}
+.order .btn-lg{width:100%}
+.fine{font-size:12.5px;color:var(--ash)}
+
+/* ---------- how ---------- */
+.how{padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s6);margin-top:var(--s8);position:relative}
+.how li{list-style:none;position:relative}
+.how .n{font-family:var(--font-display);font-size:96px;line-height:.8;color:var(--seam);-webkit-text-stroke:1px var(--rim)}
+.how h3{font-weight:500;font-size:18px;margin-top:var(--s4)}
+.how p{color:var(--ash);margin-top:var(--s2);max-width:34ch;font-size:15px}
+.how code{font-size:13px;color:var(--bone)}
+
+/* ---------- developers ---------- */
+.dev{display:grid;grid-template-columns:1fr 1fr;gap:var(--s8);margin-top:var(--s7)}
+.dev h3{font-weight:500;font-size:18px}
+.dev p{color:var(--ash);font-size:15px;margin-top:var(--s2)}
+.kv{margin-top:var(--s5);display:grid;grid-template-columns:auto 1fr;gap:var(--s3) var(--s5);font-size:14px}
+.kv dt{color:var(--ash)}
+.kv dd{word-break:break-all}
+.kv a{text-underline-offset:3px}
+pre{margin-top:var(--s5);background:var(--hull);border:1px solid var(--seam);border-radius:var(--r-field);padding:var(--s5);font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--bone);overflow:auto}
+pre .c{color:var(--ash)}
+
+/* ---------- feed ---------- */
+.stats{display:flex;gap:var(--s8);margin-top:var(--s7)}
+.stat .v{font-family:var(--font-display);font-size:64px;line-height:.9;font-variant-numeric:tabular-nums}
+.stat .v.btc{color:var(--ember)}
+.stat .k{font-size:13px;color:var(--ash);margin-top:var(--s1)}
+table{width:100%;border-collapse:collapse;margin-top:var(--s7);font-size:14px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-weight:400;color:var(--ash);font-size:13px;padding:0 0 var(--s3);border-bottom:1px solid var(--seam)}
+td{padding:var(--s4) 0;border-bottom:1px solid var(--seam)}
+td.btc{color:var(--ember)}
+td a{color:var(--ash);text-underline-offset:3px}
+th:last-child,td:last-child{text-align:right}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--seam);padding:var(--s6) 0 var(--s7)}
+footer .wrap{display:flex;align-items:center;gap:var(--s5);font-size:13.5px;color:var(--ash)}
+footer .sp{margin-left:auto;display:flex;gap:var(--s5)}
+
+@media (max-width: 900px){
+  .wrap{padding:0 var(--s5)}
+  .nav-links{display:none}
+  .nav-actions{margin-left:auto}
+  .hero{grid-template-columns:1fr;min-height:auto}
+  .stage{order:-1;height:420px;margin:0 calc(-1 * var(--s5))}
+  .stage .note,.stage .leader{display:none}
+  .console{grid-template-columns:1fr}
+  .console .wallet{border-right:0;border-bottom:1px solid var(--seam)}
+  .how,.dev{grid-template-columns:1fr}
+  .stats{gap:var(--s6);flex-wrap:wrap}
+  .hide-sm{display:none}
+  section{padding:var(--s8) 0}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+
+    @property --gradient-angle-rf {
+      syntax: "<angle>";
+      initial-value: 0deg;
+      inherits: false;
+    }
+    @property --gradient-angle-offset-rf {
+      syntax: "<angle>";
+      initial-value: 0deg;
+      inherits: false;
+    }
+    @property --gradient-percent-rf {
+      syntax: "<percentage>";
+      initial-value: 5%;
+      inherits: false;
+    }
+    @property --gradient-shine-rf {
+      syntax: "<color>";
+      initial-value: #ecece6;
+      inherits: false;
+    }
+
+    .shiny {
+      --gleam-base: #000000;
+      --gleam-inset: #232328; /* seam */
+      --gleam-label: #ecece6;
+      --gleam-accent: #f7931a;
+      --gleam-accent-soft: #ffb15e;
+      --animation: gradient-angle-rf linear infinite;
+      --duration: 3s;
+      --shadow-size: 2px;
+      --transition: 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+
+      isolation: isolate;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      outline-offset: 4px;
+      padding: 0 1.875rem;
+      height: 56px;
+      white-space: nowrap;
+      font-family: inherit;
+      font-size: 1rem;
+      line-height: 1.2;
+      font-weight: 500;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      color: var(--gleam-label);
+      background:
+        linear-gradient(var(--gleam-base), var(--gleam-base)) padding-box,
+        conic-gradient(
+          from calc(var(--gradient-angle-rf) - var(--gradient-angle-offset-rf)),
+          transparent,
+          var(--gleam-accent) var(--gradient-percent-rf),
+          var(--gradient-shine-rf) calc(var(--gradient-percent-rf) * 2),
+          var(--gleam-accent) calc(var(--gradient-percent-rf) * 3),
+          transparent calc(var(--gradient-percent-rf) * 4)
+        ) border-box;
+      box-shadow: inset 0 0 0 1px var(--gleam-inset);
+      transition: var(--transition);
+      transition-property:
+        --gradient-angle-offset-rf,
+        --gradient-percent-rf,
+        --gradient-shine-rf;
+    }
+
+    .shiny::before,
+    .shiny::after,
+    .shiny span::before {
+      content: "";
+      pointer-events: none;
+      position: absolute;
+      inset-inline-start: 50%;
+      inset-block-start: 50%;
+      translate: -50% -50%;
+      z-index: -1;
+    }
+
+    .shiny:active {
+      translate: 0 1px;
+    }
+
+    .shiny::before {
+      --size: calc(100% - var(--shadow-size) * 3);
+      --position: 2px;
+      --space: calc(var(--position) * 2);
+      width: var(--size);
+      height: var(--size);
+      background: radial-gradient(
+        circle at var(--position) var(--position),
+        #ecece6 calc(var(--position) / 4),
+        transparent 0
+      ) padding-box;
+      background-size: var(--space) var(--space);
+      background-repeat: space;
+      mask-image: conic-gradient(
+        from calc(var(--gradient-angle-rf) + 45deg),
+        black,
+        transparent 10% 90%,
+        black
+      );
+      border-radius: inherit;
+      opacity: 0.4;
+      z-index: -1;
+    }
+
+    .shiny::after {
+      --animation: shimmer-rf linear infinite;
+      width: 100%;
+      aspect-ratio: 1;
+      background: linear-gradient(
+        -50deg,
+        transparent,
+        var(--gleam-accent),
+        transparent
+      );
+      mask-image: radial-gradient(circle at bottom, transparent 40%, black);
+      opacity: 0.6;
+    }
+
+    .shiny span {
+      z-index: 1;
+    }
+
+    .shiny span::before {
+      --size: calc(100% + 1rem);
+      width: var(--size);
+      height: var(--size);
+      box-shadow: inset 0 -1ex 2rem 4px var(--gleam-accent);
+      opacity: 0;
+      transition: opacity var(--transition);
+      animation: calc(var(--duration) * 1.5) breathe-rf linear infinite;
+    }
+
+    .shiny,
+    .shiny::before,
+    .shiny::after {
+      animation:
+        var(--animation) var(--duration),
+        var(--animation) calc(var(--duration) / 0.4) reverse paused;
+      animation-composition: add;
+    }
+
+    .shiny:is(:hover, :focus-visible) {
+      --gradient-percent-rf: 20%;
+      --gradient-angle-offset-rf: 95deg;
+      --gradient-shine-rf: var(--gleam-accent-soft);
+    }
+
+    .shiny:is(:hover, :focus-visible),
+    .shiny:is(:hover, :focus-visible)::before,
+    .shiny:is(:hover, :focus-visible)::after {
+      animation-play-state: running;
+    }
+
+    .shiny:is(:hover, :focus-visible) span::before {
+      opacity: 1;
+    }
+
+    @keyframes gradient-angle-rf {
+      to {
+        --gradient-angle-rf: 360deg;
+      }
+    }
+
+    @keyframes shimmer-rf {
+      to {
+        rotate: 360deg;
+      }
+    }
+
+    @keyframes breathe-rf {
+      from,
+      to {
+        scale: 1;
+      }
+      50% {
+        scale: 1.2;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .shiny,
+      .shiny::before,
+      .shiny::after,
+      .shiny span::before {
+        animation: none !important;
+      }
+
+      .shiny:is(:hover, :focus-visible),
+      .shiny:is(:hover, :focus-visible)::before,
+      .shiny:is(:hover, :focus-visible)::after {
+        animation-play-state: paused !important;
+      }
+
+      .shiny:is(:hover, :focus-visible) span::before {
+        opacity: 0;
+      }
+
+      .shiny {
+        transition: none;
+      }
+    }
+
+</style>
+</head>
+<body>
+
+<header class="wrap nav">
+  <a class="brand" href="#" aria-label="Refuel home">
+    <svg class="brand-mark" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="none" stroke="#ecece6" stroke-width="1.2"/><path d="M1 13.5 A10 10 0 0 0 21 13.5 Z" fill="#f7931a"/></svg>
+    Refuel
+  </a>
+  <nav class="nav-links" aria-label="Sections">
+    <a href="#how">How it works</a><a href="#developers">For developers</a><a href="#feed">Live feed</a>
+  </nav>
+  <div class="nav-actions">
+    <span class="badge hide-sm"><i></i>Mezo testnet</span>
+    <a class="btn btn-outline btn-sm" href="#refuel">Connect wallet</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div class="hero-copy">
+      <h1 class="display-xl">Got MUSD but<br>no BTC for gas?<br>Refuel.</h1>
+      <p class="lead">Sign once, with no gas needed, and get enough BTC to use Mezo. The relayer pays for the transaction; you pay a few cents in MUSD.</p>
+      <div class="hero-cta">
+        <button class="shiny" type="button" onclick="location.hash='refuel'"><span>Refuel my wallet</span></button>
+        <a class="link" href="#how">How it works</a>
+      </div>
+    </div>
+    <div class="stage" aria-hidden="true">
+      <canvas id="sphere"></canvas>
+      <svg class="leader" viewBox="0 0 700 760" preserveAspectRatio="none">
+        <path d="M120 170 C 170 160, 210 190, 250 235"/><circle cx="250" cy="235" r="2.5"/>
+        <path d="M560 690 C 540 660, 520 640, 480 620"/><circle cx="480" cy="620" r="2.5"/>
+      </svg>
+      <p class="note" style="left:2%;top:15%"><b class="btc num">0.00122 BTC</b>in the tank right now</p>
+      <p class="note" style="right:6%;bottom:2%;text-align:right"><b class="num">$65,360.43</b>BTC price from Mezo PriceFeed</p>
+    </div>
+  </div>
+
+  <!-- ===================== CONSOLE ===================== -->
+  <section id="refuel">
+    <div class="wrap">
+      <h2 class="h2">Fill up in under a minute</h2>
+      <p class="sub">Pick an amount and sign. Your wallet never needs BTC to start.</p>
+
+      <div class="console">
+        <div class="wallet">
+          <div class="who"><span>Connected</span><span class="addr num">0x908d…cb25</span></div>
+          <div class="readout zero">
+            <span class="label">BTC for gas</span>
+            <span class="val num" id="btcVal">0<small>BTC</small></span>
+            <span class="hint">You can't send transactions yet.</span>
+          </div>
+          <div class="readout musd">
+            <span class="label">MUSD</span>
+            <span class="val num">5.00<small>MUSD</small></span>
+          </div>
+          <div class="gauge" aria-label="Refuel tank level">
+            <div class="track"><div class="fill"></div></div>
+            <p><span>Tank: 0.00122 of 0.002 BTC</span><span>Daily budget left: 61%</span></p>
+          </div>
+        </div>
+
+        <div class="order">
+          <h3>How much MUSD to swap for gas?</h3>
+          <div class="chips" role="group" aria-label="Amount">
+            <button class="chip" aria-pressed="false">1<span>MUSD</span></button>
+            <button class="chip" aria-pressed="true">2<span>MUSD</span></button>
+            <button class="chip" aria-pressed="false">5<span>MUSD</span></button>
+          </div>
+          <dl class="quote">
+            <div class="get" style="display:contents"><dt>You get</dt><dd>0.00002922 BTC</dd></div>
+            <dt>Enough for about</dt><dd>3.3 million transactions*</dd>
+            <dt>Fee</dt><dd>0.09 MUSD</dd>
+            <dt>BTC price, from Mezo PriceFeed</dt><dd>$65,360.43</dd>
+            <p class="muted">*Estimate at today's gas price of 146 wei and 60,000 gas per transaction.</p>
+          </dl>
+          <ol class="steps" aria-label="Progress">
+            <li class="now">Sign the permit</li><li>Relayer sends it</li><li>BTC received</li>
+          </ol>
+          <button class="btn btn-primary btn-lg">Sign and refuel</button>
+          <p class="fine">Signing is free. 3 refuels per wallet, one every 24 hours. Testnet only.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HOW ===================== -->
+  <section id="how">
+    <div class="wrap">
+      <hr class="rule">
+      <h2 class="h2" style="margin-top:var(--s8)">One signature, no gas</h2>
+      <ol class="how">
+        <li><div class="n">1</div><h3>You sign a permit</h3><p>An EIP-2612 signature lets Refuel take the MUSD amount you picked. It's a signature, not a transaction, so it costs nothing.</p></li>
+        <li><div class="n">2</div><h3>The relayer sends it</h3><p>Our relayer submits <code>refuelWithPermit</code> and pays the gas. It can't change where the BTC goes: only to the wallet that signed.</p></li>
+        <li><div class="n">3</div><h3>BTC lands in your wallet</h3><p>The contract prices BTC with Mezo's PriceFeed and sends native BTC. Your next transaction pays its own gas.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ===================== DEVELOPERS ===================== -->
+  <section id="developers">
+    <div class="wrap">
+      <hr class="rule">
+      <h2 class="h2" style="margin-top:var(--s8)">Built on Mezo's own contracts</h2>
+      <div class="dev">
+        <div>
+          <h3>What it touches</h3>
+          <p>Refuel reads Mezo's PriceFeed, pulls MUSD through its built-in permit, and pays out native BTC. The contract is verified, so you can read every line.</p>
+          <dl class="kv num">
+            <dt>Refuel</dt><dd><a href="#">0xb5D2f0E4A19bfdd422Ec285BD82F951583D5a912</a></dd>
+            <dt>MUSD</dt><dd>0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503</dd>
+            <dt>PriceFeed</dt><dd>0x86bCF0841622a5dAC14A313a15f96A95421b9366</dd>
+            <dt>Network</dt><dd>Mezo testnet, chain 31611</dd>
+          </dl>
+        </div>
+        <div>
+          <h3>Refuel your own users</h3>
+          <p>Quote, have the user sign, then post the signature. Same API this page uses.</p>
+<pre><span class="c"># 1. quote and get the permit to sign</span>
+GET  /api/quote?owner=0x…&amp;amount=2
+<span class="c"># 2. send the signature</span>
+POST /api/refuel
+{ "owner": "0x…", "amountIn": "2000000000000000000",
+  "deadline": "1794737000", "signature": "0x…" }</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FEED ===================== -->
+  <section id="feed">
+    <div class="wrap">
+      <hr class="rule">
+      <h2 class="h2" style="margin-top:var(--s8)">Wallets refueled so far</h2>
+      <div class="stats">
+        <div class="stat"><div class="v num">5</div><div class="k">Refuels</div></div>
+        <div class="stat"><div class="v num">5</div><div class="k">Wallets unstuck</div></div>
+        <div class="stat"><div class="v btc num">0.000146</div><div class="k">BTC sent</div></div>
+      </div>
+      <table>
+        <thead><tr><th>Wallet</th><th>Paid</th><th>Received</th><th class="hide-sm">When</th><th>Transaction</th></tr></thead>
+        <tbody>
+          <tr><td>0x908d…cb25</td><td>2 MUSD</td><td class="btc">0.00002918 BTC</td><td class="hide-sm">4 min ago</td><td><a href="#">0x5e1a…77c0</a></td></tr>
+          <tr><td>0x41f2…09ab</td><td>2 MUSD</td><td class="btc">0.00002920 BTC</td><td class="hide-sm">12 min ago</td><td><a href="#">0x9b07…12de</a></td></tr>
+          <tr><td>0x7c33…e4f1</td><td>2 MUSD</td><td class="btc">0.00002922 BTC</td><td class="hide-sm">31 min ago</td><td><a href="#">0x02cc…a9f3</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="badge"><i></i>Testnet only</span>
+    <span>Built for the Mezo Buildathon</span>
+    <span class="sp"><a href="#">Verified contract</a><a href="#">GitHub</a></span>
+  </div>
+</footer>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+<script type="module">
+import * as THREE from "three";
+
+const canvas = document.getElementById("sphere");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 20);
+camera.position.set(0, 0, 4.4);
+
+// ---- particles: a thick Fibonacci shell + polar clusters (ref: dotted sphere)
+const small = innerWidth < 900;
+const N = small ? 11000 : 22000, POLE = small ? 1200 : 2400;
+const pos = new Float32Array((N + POLE) * 3), rnd = new Float32Array(N + POLE);
+const golden = Math.PI * (3 - Math.sqrt(5));
+for (let i = 0; i < N; i++) {
+  const y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(1 - y * y), th = golden * i;
+  const shell = 1 - Math.pow(Math.random(), 4) * 0.10;               // most points on the skin, some inside
+  const j = 0.012;
+  pos.set([Math.cos(th) * r * shell + (Math.random()-.5)*j, y * shell + (Math.random()-.5)*j, Math.sin(th) * r * shell + (Math.random()-.5)*j], i * 3);
+  rnd[i] = Math.random();
+}
+for (let k = 0; k < POLE; k++) {                                      // bright caps at the poles
+  const i = N + k, s = k % 2 ? 1 : -1;
+  const u = Math.random() * 2 * Math.PI, v = Math.acos(1 - Math.random() * 0.12);
+  const shell = 1 - Math.random() * 0.05;
+  pos.set([Math.sin(v) * Math.cos(u) * shell, s * Math.cos(v) * shell, Math.sin(v) * Math.sin(u) * shell], i * 3);
+  rnd[i] = Math.random();
+}
+const geo = new THREE.BufferGeometry();
+geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+geo.setAttribute("aRand", new THREE.BufferAttribute(rnd, 1));
+
+const uniforms = {
+  uTime: { value: 0 },
+  uSize: { value: small ? 6.5 : 9.0 },
+  uPR: { value: renderer.getPixelRatio() },
+  uBreath: { value: 0.0 },                   // 0 = perfect sphere (no blob wobble)
+  uFill: { value: 0.61 },                    // tank level 0..1 = floatBalance / FLOAT_FULL
+  uBone: { value: new THREE.Color("#ecece6") },
+};
+const mat = new THREE.ShaderMaterial({
+  uniforms, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  vertexShader: `
+    attribute float aRand;
+    uniform float uTime, uSize, uPR, uBreath, uFill;
+    varying float vA;
+    float wob(vec3 p){
+      return sin(p.x*3.1+uTime*.55)*sin(p.y*2.7-uTime*.45)*sin(p.z*3.3+uTime*.35);
+    }
+    void main(){
+      vec3 n = normalize(position);
+      vec3 p = position + n * wob(n*1.4) * uBreath;
+      vec4 mv = modelViewMatrix * vec4(p, 1.0);
+      gl_Position = projectionMatrix * mv;
+      gl_PointSize = uSize * uPR * (0.55 + aRand * 0.9) / -mv.z;
+      float depth = smoothstep(-5.4, -3.4, mv.z);          // back of sphere dimmer
+      float tank = position.y * 0.5 + 0.5 < uFill ? 1.0 : 0.42; // below the fill line: full brightness
+      vA = mix(0.22, 1.0, depth) * tank * (0.65 + aRand * 0.35);
+    }`,
+  fragmentShader: `
+    uniform vec3 uBone; varying float vA;
+    void main(){
+      float d = length(gl_PointCoord - 0.5);
+      if (d > 0.5) discard;
+      gl_FragColor = vec4(uBone, smoothstep(0.5, 0.05, d) * vA);
+    }`,
+});
+const points = new THREE.Points(geo, mat);
+points.rotation.x = 0.32;
+scene.add(points);
+
+function resize(){
+  const { clientWidth: w, clientHeight: h } = canvas;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+addEventListener("resize", resize); resize();
+
+let mx = 0, my = 0;
+addEventListener("pointermove", e => { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; });
+
+const clock = new THREE.Clock();
+function frame(){
+  const t = clock.getElapsedTime();
+  uniforms.uTime.value = t;
+  points.rotation.y = t * 0.06;
+  points.rotation.x = 0.32 + my * 0.08;
+  points.rotation.z = mx * 0.05;
+  renderer.render(scene, camera);
+  if (!reduce) requestAnimationFrame(frame);
+}
+frame();
+window.__sphereReady = true;
+</script>
+</body>
+</html>
