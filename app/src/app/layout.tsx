@@ -1,9 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Iceland } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], weight: ["400", "500"] });
-const iceland = Iceland({ weight: "400", subsets: ["latin"], variable: "--font-iceland", display: "swap" });
+// Fonts are self-hosted (no build-time fetch from Google Fonts, which broke a Vercel build).
+// GeistSans sets --font-geist-sans; Iceland (OFL) is vendored in src/fonts.
+const iceland = localFont({
+  src: "../fonts/iceland-latin-400-normal.woff2",
+  weight: "400",
+  variable: "--font-iceland",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Refuel: BTC gas for MUSD holders on Mezo",
@@ -14,7 +21,7 @@ export const viewport: Viewport = { themeColor: "#000000", colorScheme: "dark" }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${iceland.variable}`} style={{ colorScheme: "dark" }}>
+    <html lang="en" className={`${GeistSans.variable} ${iceland.variable}`} style={{ colorScheme: "dark" }}>
       <body>{children}</body>
     </html>
   );
